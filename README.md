@@ -20,3 +20,7 @@ cd ~/OSS-project-13 --> 폴더 이동
 jupyter notebook 
 
 ```
+
+## 3. [Windows]wget 설치
+- [https://uhhyunjoo.tistory.com/65](https://uhhyunjoo.tistory.com/65) 참조
+
