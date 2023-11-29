@@ -1,6 +1,6 @@
 # Finger Counter using OpenCV and mediapipe
 ## 1. 개요
- - Mediapipe 핸드 데이터로부터 숫자 인식
+ - MediaPipe 핸드 데이터로부터 핑거 카운터 구현
  - Counting 알고리즘과 프로그램 코드를 분리하여 알고리즘 개선에 유리하도록 함
 
 
@@ -32,5 +32,7 @@ python main.py
 ```
 
 ## 5. 참조 사이트
+ - https://github.com/google/mediapipe/blob/master/docs/solutions/hands.md
  - https://github.com/GasbaouiMohammedAlAmin/Finger-Counter-using-Hand-Tracking-And-Open-cv.git
+ - https://youtu.be/01sAkU_NvOY?si=2X6JEZ-9QbW9Dhpy
  - https://github.com/topics/finger-count-recognition
