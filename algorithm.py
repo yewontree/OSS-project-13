@@ -7,6 +7,14 @@ def distance(a, b):
     return np.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2 + (a.z - b.z) ** 2)
 
 
+def to_list_landmarks(self, hand_landmarks):
+    """change hand_landmarks' position data to list, and return"""
+    data = []
+    for mark in hand_landmarks:
+        data.append([mark.x, mark.y, mark.z])
+    return data
+
+
 def to_ndarray(landmark):
     return np.array([landmark.x, landmark.y, landmark.z])
 
@@ -22,7 +30,6 @@ def radius(A, B, C):
     b3 = c * c * (a * a + b * b - c * c)
     center = np.column_stack((A, B, C)).dot(np.hstack((b1, b2, b3)))
     center /= b1 + b2 + b3
-
     return radius if radius > 0 else np.inf
 
 
@@ -213,3 +220,5 @@ result = HandLandmarkerResult(
 
 if __name__ == "__main__":
     hand_landmarks_list = result.hand_landmarks
+
+    # TODO Test Algorithm here with had_landmarks_list
