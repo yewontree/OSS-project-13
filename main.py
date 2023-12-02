@@ -4,16 +4,23 @@ from mediapipe.tasks import python
 from mediapipe.tasks.python import vision
 import logging, coloredlogs
 
-from utils import draw_fingercount_on_image
+import algorithm
+from utils import extract_subclass, select_algorithm, get_args, draw_fingercount_on_image
+from utils import get_video_writer, save_data
 
-logger = logging.getLogger(__name__)
-coloredlogs.install(level="DEBUG", logger=logger)  # logger 설정, logger.debug() 함수로 로그메시지 표시
+algos = extract_subclass(algorithm, algorithm.Algorithm)
+args = get_args()  # get command-line argument to args
+
+logger = logging.getLogger(__name__)  # set module name('__main__') to logger
+coloredlogs.install(level=args.log.upper(), logger=logger)  # logger 설정
 
 
 def main():
     cap = cv2.VideoCapture(0)
-    # TODO 핑거 카운터 알고리즘 설정
-    # TODO 동영상 저장 설정
+    algo = select_algorithm(algos, args)
+    if args.save:  # 비디오 영상저장 객체 생성(out)
+        out, filename = get_video_writer(algo)
+        logger.info(f"video streaming will be saved to '{filename}' file")
 
     # https://developers.google.com/mediapipe/solutions/vision/hand_landmarker/python#video
     base_options = python.BaseOptions(model_asset_path="models/hand_landmarker.task")
@@ -33,20 +40,29 @@ def main():
                 annotated_image = draw_fingercount_on_image(  # 원본 카메라 영상에 detection 결과를 합성
                     rgb_image=image_origin,
                     detection_result=detection_result,
-                    # TODO 핑거 카운터 알고리즘 추가
+                    algo=algo,
                 )
 
                 cv2.imshow(f"Finger Counter", annotated_image)  # 동영상 재생
-                # TODO 동영상 저장 코드 추가
+                if args.save:  # save annotated_image to .avi file
+                    out.write(annotated_image)
 
-                if cv2.waitKey(1) & 0xFF == ord("q"):
+                key_pressed = cv2.waitKey(1) & 0xFF
+                if key_pressed == ord("q"):  # 프로그램 종료
                     break
+                elif key_pressed == ord("s"):  # 'results/data' 폴더로 이미지, 데이터 저장
+                    save_data(detection_result.hand_landmarks, annotated_image)
+
             else:
-                logger.critical(f"cap.read() error")
+                logger.error(f"cap.read() error")
                 break
 
-        cap.release()
-        cv2.destroyAllWindows()
+    cap.release()
+    if args.save:
+        out.release()
+        logger.info(f"video streaming saved to '{filename}' file")
+    cv2.destroyAllWindows()
+    logger.info(f"program exit normally\n")
 
 
 if __name__ == "__main__":
