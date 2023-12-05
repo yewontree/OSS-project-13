@@ -29,14 +29,15 @@ def main():
 
     detection_result = None  # 콜백(callback)함수 리턴값 저장용 변수 (callback 함수내에서 nonlocal로 access한다)
     detection_image = None
-    detection_time = None
+    detection_time = 0
+    detection_time_pre = 0
 
     # Create a hand landmarker instance with the live stream mode:
     def callback_result(result: HandLandmarkerResult, output_image: mp.Image, timestamp_ms: int):
-        nonlocal detection_result, detection_image, detection_time
+        nonlocal detection_result, detection_image, detection_time, detection_time_pre
         detection_result = result
         detection_image = output_image.numpy_view()
-        detection_time = timestamp_ms
+        detection_time_pre, detection_time = detection_time, timestamp_ms
         logger.debug(f"hand landmarker result: timestamp_ms: {timestamp_ms}\n {result}")
 
     # https://developers.google.com/mediapipe/solutions/vision/hand_landmarker/python#video
@@ -55,19 +56,18 @@ def main():
                 rgb_frame = mp.Image(image_format=mp.ImageFormat.SRGB, data=image_origin)
                 detector.detect_async(rgb_frame, ms_timestamp())  # notebook/HandLandmarkerResult.ipynb 참조
 
-                if detection_result:
+                if detection_time - detection_time_pre > 0:
                     annotated_image = draw_fingercount_on_image(  # 원본 카메라 영상에 detection 결과를 합성
                         rgb_image=detection_image,
                         detection_result=detection_result,
                         algo=algo,
                         timestamp=to_datetime_str(detection_time // 1000),
                     )
-                else:
-                    annotated_image = image_origin
+                    detection_time_pre = detection_time
 
-                cv2.imshow(f"Finger Counter", annotated_image)  # 동영상 재생
-                if args.save:  # 동영상 저장
-                    out.write(annotated_image)
+                    cv2.imshow(f"Finger Counter", annotated_image)  # 동영상 재생
+                    if args.save:  # 동영상 저장
+                        out.write(annotated_image)
 
                 key_pressed = cv2.waitKey(1) & 0xFF
                 if key_pressed == ord("q"):
