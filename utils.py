@@ -10,11 +10,46 @@ import pandas as pd
 from datetime import datetime
 from typing import TypeVar
 
-import algorithm
 from settings import *
+import algorithm
 
 logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO", logger=logger)  # logger 설정, logger.debug() 함수로 로그메시지 표시
+
+
+class DetectInfo:
+    def __init__(self):
+        self.detection_result = None  # 콜백(callback)함수 리턴값 저장용 변수 (callback 함수내에서 nonlocal로 access한다)
+        self.detection_image = None
+        self.detection_time = 0
+        self.detection_time_pre = 0
+        self.count = 0
+        self.time_diff = self.time_total = self.time_diff_mean = 0
+
+    def update(self, result):
+        self.detection_result = result
+        self.detection_time_pre, self.detection_time = self.detection_time, ms_timestamp_now()
+        self.time_diff = self.detection_time - self.detection_time_pre
+        if self.time_diff and self.detection_time_pre:
+            self.count += 1
+            self.time_total += self.time_diff
+            self.time_diff_mean = self.time_total / self.count
+
+    def update_live(self, result, output_image, timestamp_ms):
+        self.detection_result = result
+        self.detection_image = output_image.numpy_view()
+        self.detection_time_pre, self.detection_time = self.detection_time, timestamp_ms
+        self.time_diff = self.detection_time - self.detection_time_pre
+        if self.time_diff and self.detection_time_pre:
+            self.count += 1
+            self.time_total += self.time_diff
+            self.time_diff_mean = self.time_total / self.count
+
+    def new_detection(self):
+        return self.time_diff
+
+    def reset_detection(self):
+        self.time_diff = 0
 
 
 # https://github.com/googlesamples/mediapipe/blob/main/examples/hand_landmarker/python/hand_landmarker.ipynb
@@ -168,7 +203,7 @@ def select_algorithm(algos, args):
     return algos[args.algo]()
 
 
-def ms_timestamp():
+def ms_timestamp_now():
     now = datetime.now()
     timestamp_seconds = datetime.timestamp(now)  # Convert it to a timestamp (in seconds)
     return int(timestamp_seconds * 1000)
@@ -180,23 +215,31 @@ def to_datetime_str(time):
     return datetime_object.strftime("%H:%M:%S")
 
 
+def check_folder(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+        logger.info(f"folder '{path}' created")
+
+
 def get_video_writer(algo):
+    check_folder(avi_folder)  # if not exist, make avi_folder
     fourcc = cv2.VideoWriter_fourcc(*"XVID")  # for saving video stream
     datetime_str = datetime.now().strftime("%Y-%m-%d_%H%M%S")
-    filename = f"results/avi/{algo.__class__.__name__}({datetime_str}).avi"
-    out = cv2.VideoWriter(filename, fourcc, 20.0, (640, 480))
+    filename = avi_folder / f"{algo.__class__.__name__}({datetime_str}).avi"
+    out = cv2.VideoWriter(str(filename), fourcc, 20.0, (640, 480))
     return out, filename
 
 
 def save_data(results, image):
     if results:
-        filename = datetime.now().strftime("%Y-%m-%d_%H%M%S")
-        cv2.imwrite(f"results/data/{filename}.jpg", image)
-        logger.info(f"image saved: results/data/{filename}.jpg")
+        check_folder(data_folder)  # if not exist, make data_folder
+        filename = data_folder / datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        cv2.imwrite(f"{filename}.jpg", image)
+        logger.info(f"image saved: {filename}.jpg")
 
         data = []
         for i, result in enumerate(results):
             for mark in result:
                 data.append([mark.x, mark.y, mark.z])
-            pd.DataFrame(data, columns=["x", "y", "z"]).to_csv(f"results/data/{filename}_{i}.csv", index=False)
-            logger.info(f"data saved: results/data/{filename}_{i}.csv")
+            pd.DataFrame(data, columns=["x", "y", "z"]).to_csv(f"{filename}_{i}.csv", index=False)
+            logger.info(f"data saved: {filename}_{i}.csv")

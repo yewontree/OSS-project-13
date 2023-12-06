@@ -6,7 +6,7 @@ import logging, coloredlogs
 
 import algorithm
 from utils import extract_subclass, select_algorithm, get_args, draw_fingercount_on_image
-from utils import get_video_writer, save_data
+from utils import get_video_writer, save_data, DetectInfo
 
 algos = extract_subclass(algorithm, algorithm.Algorithm)
 args = get_args()  # get command-line argument to args
@@ -22,6 +22,8 @@ def main():
         out, filename = get_video_writer(algo)
         logger.info(f"video streaming will be saved to '{filename}' file")
 
+    d = DetectInfo()
+
     # https://developers.google.com/mediapipe/solutions/vision/hand_landmarker/python#video
     base_options = python.BaseOptions(model_asset_path="models/hand_landmarker.task")
     options = vision.HandLandmarkerOptions(base_options=base_options, num_hands=2)
@@ -35,7 +37,8 @@ def main():
                 detection_result = detector.detect(rgb_frame)  # notebook/HandLandmarkerResult.ipynb 참조
 
                 if detection_result:  # detection_result 로그데이터 생성
-                    logger.debug(f"detection_result:\n {detection_result}")
+                    d.update(detection_result)
+                    logger.debug(f"hand landmarker result: timestamp_ms: {d.time_diff}, avg: {d.time_diff_mean:4.1f}\n {detection_result}")
 
                 annotated_image = draw_fingercount_on_image(  # 원본 카메라 영상에 detection 결과를 합성
                     rgb_image=image_origin,
