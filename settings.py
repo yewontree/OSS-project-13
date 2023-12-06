@@ -6,6 +6,10 @@ logger = logging.getLogger(__name__)
 coloredlogs.install(level="INFO", logger=logger)  # logger 설정, logger.info() 함수로 로그메시지 표시
 
 root = Path(os.path.dirname(__file__))  # 이 파일(settings.py)이 속한 폴더를 root명으로 추출
+image_folder = Path("images")
+model_folder = Path("models")
+avi_folder = Path("results/avi")
+data_folder = Path("results/data")
 
 # 미디어파이프(mediapipe) 핸드 랜드마크 검출 예제에서 사용하는 파라미터
 MARGIN = 10  # pixels 글자를 표시할 이미지 여백

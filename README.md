@@ -43,8 +43,8 @@ options:
 
 
 ❯ python main.py --algo basic
-❯ python main.py --algo basic
-❯ python main.py --algo thumbcheck --log debug
+❯ python main.py --algo thumbcheck
+❯ python main.py --algo thumbcheck --log_a debug
 ❯ python main.py --algo thumbcheck --log debug --save
 ...
 ```
