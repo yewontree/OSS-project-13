@@ -59,7 +59,7 @@ s key : 데이터 캡쳐 저장 (results/data 폴더)
 ![예제2](images/4.jpg)   
 ![예제3](images/5.jpg)
 
-## 6. 참조 사이트
+## 7. 참조 사이트
  - https://github.com/google/mediapipe/blob/master/docs/solutions/hands.md
  - https://github.com/GasbaouiMohammedAlAmin/Finger-Counter-using-Hand-Tracking-And-Open-cv.git
  - https://youtu.be/01sAkU_NvOY?si=2X6JEZ-9QbW9Dhpy
