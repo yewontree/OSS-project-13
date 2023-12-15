@@ -55,9 +55,9 @@ s key : 데이터 캡쳐 저장 (results/data 폴더)
 ```
 
 ## 6 실험 결과
-![예제1](images\3.jpg)   
-![예제2](images\4.jpg)   
-![예제3](images\5.jpg)
+![예제1](images/3.jpg)   
+![예제2](images/4.jpg)   
+![예제3](images/5.jpg)
 
 ## 6. 참조 사이트
  - https://github.com/google/mediapipe/blob/master/docs/solutions/hands.md
